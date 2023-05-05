@@ -30,7 +30,7 @@ class CSP:
         if len(assignment) == len(self.variables):
             return assignment
         var = self.select_unassigned_variable(assignment)
-        for value in self.order_domain_values(var, assignment):
+        for value in self.order_domain_values(var):
             if self.is_consistent(var, value, assignment):
                 assignment[var] = value
                 result = self.backtracking_search(assignment)
@@ -41,9 +41,9 @@ class CSP:
     
     def select_unassigned_variable(self, assignment):
         unassigned = [v for v in self.variables if v not in assignment]
-        return self.most_constrained_variable(unassigned)
+        return self.min_remaining_values(unassigned)
     
-    def order_domain_values(self, var, assignment):
+    def order_domain_values(self, var):
         return self.domains[var]
     
     def is_consistent(self, var, value, assignment):
@@ -52,5 +52,5 @@ class CSP:
                 return False
         return True
     
-    def most_constrained_variable(self, variables):
+    def min_remaining_values(self, variables):
         return min(variables, key=lambda var: len(self.domains[var]))

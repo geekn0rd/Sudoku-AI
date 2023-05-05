@@ -27,5 +27,3 @@ if solution is not None:
         for j in range(9):
             print(solution[i][j], end=' ')
         print()
-else:
-    print("No solution found")

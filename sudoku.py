@@ -26,7 +26,7 @@ def solve_sudoku(grid):
     csp.ac3()
     solution = csp.backtracking_search()
     if solution is None:
-        print("No solution found")
+        print("Unsolvable CSP!")
     else:
         for i in range(9):
             for j in range(9):
