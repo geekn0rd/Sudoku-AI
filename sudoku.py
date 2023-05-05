@@ -1,45 +1,35 @@
-from csp import *
+from csp import CSP
 
-def solve_sudoku_csp(board: list[list[int]]) -> list[list[int]]:
+def sudoku_csp(grid):
     variables = []
-    constraints = []
-    assignment = []
+    domains = {}
     for i in range(9):
         for j in range(9):
-            if board[i][j] == 0:
-                domain = list(range(1, 10))
+            if grid[i][j] == 0:
+                variables.append((i, j))
+                domains[(i, j)] = set(range(1, 10))
             else:
-                domain = [board[i][j]]
-            variable = Variable(i, j, domain)
-            if board[i][j] != 0:
-                assignment.append(variable)
-            variables.append(variable)
-
+                domains[(i, j)] = set([grid[i][j]])
+    neighbors = {}
     for i in range(9):
-        row_vars = [var for var in variables if var.row == i]
-        row_constraint = SudokuConstraint(row_vars)
-        #print(*row_vars)
-        constraints.append(row_constraint)
+        for j in range(9):
+            row = [(i, y) for y in range(9) if y != j]
+            col = [(x, j) for x in range(9) if x != i]
+            box = [(x, y) for x in range((i//3)*3, (i//3)*3+3) 
+                          for y in range((j//3)*3, (j//3)*3+3) if x != i or y != j]
+            neighbors[(i, j)] = set(row + col + box)
+    constraints = lambda xi, x, xj, y: x != y
+    return CSP(variables, domains, neighbors, constraints)
 
-    for j in range(9):
-        col_vars = [var for var in variables if var.col == j]
-        col_constraint = SudokuConstraint(col_vars)
-        #print(*col_vars)
-        constraints.append(col_constraint)
-
-    for i in range(0, 9, 3):
-        for j in range(0, 9, 3):
-            block_vars = [var for var in variables if var.row in range(i, i+3) and var.col in range(j, j+3)]
-            block_constraint = SudokuConstraint(block_vars)
-            #print(*block_vars)
-            constraints.append(block_constraint)
-    
-    csp = CSP(variables, constraints)
-    result = backtrack(csp, assignment)
-    if result is not None:
-        for var in result:
-            board[var.row][var.col] = var.value
-    # for const in constraints:
-    #     print(*const.variables)
-
-    return board
+def solve_sudoku(grid):
+    csp = sudoku_csp(grid)
+    csp.ac3()
+    solution = csp.backtracking_search()
+    if solution is None:
+        print("No solution found")
+    else:
+        for i in range(9):
+            for j in range(9):
+                if (i, j) in solution:
+                    grid[i][j] = solution[(i, j)]
+        return grid
