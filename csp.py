@@ -1,11 +1,11 @@
 class CSP:
-    def __init__(self, variables, domains, neighbors, constraints):
+    def __init__(self, variables: list, domains: dict, neighbors: dict, constraints: function):
         self.variables = variables
         self.domains = domains
         self.neighbors = neighbors
         self.constraints = constraints
     
-    def ac3(self, queue=None):
+    def ac3(self, queue: list = None) -> bool:
         if queue is None:
             queue = [(i, j) for i in self.variables for j in self.neighbors[i]]
         while queue:
@@ -18,7 +18,7 @@ class CSP:
                         queue.append((xk, xi))
         return True
     
-    def revise(self, xi, xj):
+    def revise(self, xi: tuple, xj: tuple) -> bool:
         revised = False
         for x in set(self.domains[xi]):
             if not any([self.constraints(xi, x, xj, y) for y in self.domains[xj]]):
@@ -26,7 +26,7 @@ class CSP:
                 revised = True
         return revised
     
-    def backtracking_search(self, assignment={}):
+    def backtracking_search(self, assignment: dict = {}) -> dict:
         if len(assignment) == len(self.variables):
             return assignment
         var = self.select_unassigned_variable(assignment)
@@ -39,18 +39,18 @@ class CSP:
                 del assignment[var]
         return None
     
-    def select_unassigned_variable(self, assignment):
+    def select_unassigned_variable(self, assignment: dict) -> list:
         unassigned = [v for v in self.variables if v not in assignment]
         return self.min_remaining_values(unassigned)
     
-    def order_domain_values(self, var):
+    def order_domain_values(self, var: tuple) -> list:
         return self.domains[var]
     
-    def is_consistent(self, var, value, assignment):
+    def is_consistent(self, var: tuple, value: int, assignment: dict) -> bool:
         for neighbor in self.neighbors[var]:
             if neighbor in assignment and not self.constraints(var, value, neighbor, assignment[neighbor]):
                 return False
         return True
     
-    def min_remaining_values(self, variables):
+    def min_remaining_values(self, variables: list) -> tuple:
         return min(variables, key=lambda var: len(self.domains[var]))
